@@ -2,11 +2,13 @@
   "manifest_version": 3,
   "name": "AI Studio Turn Trimmer",
   "version": "2.1.0",
-  "description": "Trim Google AI Studio chat turns using fixed-count and target-token modes.",
+  "description": "Trim Google AI Studio conversations by turn position or a target token count, including token counters inside shadow DOM.",
   "permissions": [
     "storage",
     "tabs",
-    "scripting"
+    "scripting",
+    "alarms",
+    "notifications"
   ],
   "host_permissions": [
     "https://aistudio.google.com/*"
@@ -15,8 +17,20 @@
     "service_worker": "background.js"
   },
   "action": {
+    "default_title": "AI Studio Turn Trimmer",
     "default_popup": "popup.html",
-    "default_title": "AI Studio Turn Trimmer"
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   },
   "content_scripts": [
     {
@@ -31,11 +45,5 @@
       ],
       "run_at": "document_idle"
     }
-  ],
-  "icons": {
-    "16": "icons/icon16.png",
-    "32": "icons/icon32.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
-  }
+  ]
 }

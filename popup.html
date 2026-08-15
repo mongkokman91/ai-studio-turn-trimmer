@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AI Studio Turn Trimmer</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <h1>AI Studio Turn Trimmer</h1>
+
+    <label>Stop condition
+      <select id="limitMode">
+        <option value="tokens" selected>Stop at token target</option>
+        <option value="turns">Turn-based</option>
+      </select>
+    </label>
+
+    <label id="targetTokensRow">Target total tokens
+      <input id="targetTokens" type="number" min="1000" max="10000000" step="1000" value="100000">
+    </label>
+
+    <label id="keepCountRow">Keep newest turns
+      <input id="keepCount" type="number" min="1" max="1000" value="100">
+    </label>
+
+    <label>Batch size
+      <input id="batchSize" type="number" min="1" max="50" value="20">
+    </label>
+
+    <label>Speed mode
+      <select id="speedMode">
+        <option value="turbo" selected>Turbo</option>
+        <option value="balanced">Balanced</option>
+        <option value="safe">Safe</option>
+      </select>
+    </label>
+
+    <div class="actions">
+      <button id="start">Trim from beginning</button>
+      <button id="stop" class="secondary">Stop</button>
+      <button id="reset" class="danger">Reset</button>
+    </div>
+
+    <section id="status">Loading...</section>
+    <p class="note"><strong>Token mode:</strong> trimming stops as soon as AI Studio's displayed total reaches the target. For <b>Trim ↑</b>/<b>Trim ↓</b>, the clicked turn is still kept and the job stops at the token target or the clicked boundary, whichever comes first.</p>
+    <p class="note"><strong>Turn-based mode:</strong> the popup keeps the newest N turns; direct Trim ↑/↓ removes the full chosen side.</p>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+AI Studio Turn Trimmer Privacy Notice
+
+AI Studio Turn Trimmer does not collect, sell, transmit, or share personal information.
+
+The extension runs only on https://aistudio.google.com/ and processes page content locally in the browser to perform user-requested conversation trimming. Settings and job progress are stored locally through the browser extension storage API. No conversation content, settings, analytics, or identifiers are sent to the developer or to any third party.
+
+The extension uses browser permissions only to operate on Google AI Studio pages, save settings and progress locally, resume interrupted trimming jobs, and display completion notifications.
+
+Contact: weichanl@hotmail.com
+Last updated: July 17, 2026
