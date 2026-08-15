@@ -8,7 +8,7 @@ const DEFAULT_STATE = {
   mode: "keep-newest",
   keepCount: 100,
   limitMode: "tokens",
-  targetTokens: 100000,
+  targetTokens: 30000,
   batchSize: 20,
   speedMode: "turbo",
   boundaryIndexHint: null,
