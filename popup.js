@@ -58,7 +58,7 @@ function updateConditionalFields() {
 function render(state, page = null) {
   if (!initialized || !settingsDirty) {
     limitModeInput.value = state.limitMode === "turns" ? "turns" : "tokens";
-    targetTokensInput.value = state.targetTokens ?? 100000;
+    targetTokensInput.value = state.targetTokens ?? 30000;
     keepInput.value = state.keepCount ?? 100;
     batchInput.value = state.batchSize ?? 20;
     speedInput.value = state.speedMode || "turbo";
@@ -77,7 +77,7 @@ function render(state, page = null) {
 
   const limitText = state.limitMode === "turns"
     ? (state.mode === "keep-newest" ? `Keep newest ${state.keepCount ?? 100} turns` : "Full selected side")
-    : `Stop at ${formatNumber(state.targetTokens ?? 100000)} tokens`;
+    : `Stop at ${formatNumber(state.targetTokens ?? 30000)} tokens`;
 
   statusBox.textContent = [
     `Status: ${state.status || "Idle"}`,
@@ -108,7 +108,7 @@ async function refresh() {
 
 async function persistSettings() {
   const limitMode = limitModeInput.value === "turns" ? "turns" : "tokens";
-  const targetTokens = Math.max(1000, Math.min(10000000, Number(targetTokensInput.value) || 100000));
+  const targetTokens = Math.max(1000, Math.min(10000000, Number(targetTokensInput.value) || 30000));
   const keepCount = Math.max(1, Number(keepInput.value) || 100);
   const batchSize = Math.max(1, Math.min(50, Number(batchInput.value) || 20));
   const speedMode = ["turbo", "balanced", "safe"].includes(speedInput.value) ? speedInput.value : "turbo";
@@ -139,7 +139,7 @@ startButton.addEventListener("click", async () => {
   try {
     await persistSettings();
     const limitMode = limitModeInput.value === "turns" ? "turns" : "tokens";
-    const targetTokens = Math.max(1000, Math.min(10000000, Number(targetTokensInput.value) || 100000));
+    const targetTokens = Math.max(1000, Math.min(10000000, Number(targetTokensInput.value) || 30000));
     const keepCount = Math.max(1, Number(keepInput.value) || 100);
     const batchSize = Math.max(1, Math.min(50, Number(batchInput.value) || 20));
     const speedMode = ["turbo", "balanced", "safe"].includes(speedInput.value) ? speedInput.value : "turbo";
