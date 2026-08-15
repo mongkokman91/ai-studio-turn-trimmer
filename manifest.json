@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AI Studio Turn Trimmer",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Trim Google AI Studio conversations by turn position or a target token count, including token counters inside shadow DOM.",
   "permissions": [
     "storage",
