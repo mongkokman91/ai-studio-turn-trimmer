@@ -1,0 +1,3 @@
+AI Studio Turn Trimmer sync test
+Created by ChatGPT via the connected GitHub app.
+If this file appears in your local clone after git pull, the GitHub -> local bridge is working.
