@@ -1,0 +1,76 @@
+name: Release extension
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'README.md'
+      - 'README.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build ZIP
+        shell: bash
+        run: |
+          mkdir -p dist
+          zip -r "dist/ai-studio-turn-trimmer-${{ steps.version.outputs.version }}.zip" . \
+            -x '.git/*' '.github/*' 'dist/*' '*.pem'
+
+      - name: Restore CRX signing key
+        if: ${{ env.CRX_PRIVATE_KEY_B64 != '' }}
+        env:
+          CRX_PRIVATE_KEY_B64: ${{ secrets.CRX_PRIVATE_KEY_B64 }}
+        shell: bash
+        run: |
+          echo "$CRX_PRIVATE_KEY_B64" | base64 --decode > extension.pem
+          chmod 600 extension.pem
+
+      - name: Build signed CRX and update manifest
+        if: ${{ env.CRX_PRIVATE_KEY_B64 != '' }}
+        env:
+          CRX_PRIVATE_KEY_B64: ${{ secrets.CRX_PRIVATE_KEY_B64 }}
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser || sudo apt-get install -y chromium
+          CHROME=$(command -v chromium-browser || command -v chromium)
+          "$CHROME" --no-sandbox --pack-extension="$GITHUB_WORKSPACE" --pack-extension-key="$GITHUB_WORKSPACE/extension.pem"
+          mv "${GITHUB_WORKSPACE}.crx" dist/ai-studio-turn-trimmer.crx
+          ID=$(openssl rsa -in extension.pem -pubout -outform DER 2>/dev/null | openssl sha256 -binary | head -c 16 | xxd -p -c 32 | tr '0-9a-f' 'a-p')
+          cat > dist/updates.xml <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <gupdate xmlns="http://www.google.com/update2/response" protocol="2.0">
+            <app appid="$ID">
+              <updatecheck codebase="https://github.com/mongkokman91/ai-studio-turn-trimmer/releases/latest/download/ai-studio-turn-trimmer.crx" version="${{ steps.version.outputs.version }}" />
+            </app>
+          </gupdate>
+          EOF
+          echo "Extension ID: $ID"
+          rm -f extension.pem
+
+      - name: Publish version release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
+          else
+            gh release create "$TAG" dist/* --title "$TAG" --generate-notes
+          fi
