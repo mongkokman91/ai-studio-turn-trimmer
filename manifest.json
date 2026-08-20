@@ -3,6 +3,7 @@
   "name": "AI Studio Turn Trimmer",
   "version": "2.1.3",
   "description": "Trim Google AI Studio conversations by turn position or a target token count, including token counters inside shadow DOM.",
+  "update_url": "https://github.com/mongkokman91/ai-studio-turn-trimmer/releases/latest/download/updates.xml",
   "permissions": [
     "storage",
     "tabs",
