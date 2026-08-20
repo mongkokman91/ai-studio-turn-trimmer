@@ -1,6 +1,6 @@
 const STATE_KEY = "trimmerState";
 const ALARM_NAME = "aiStudioTurnTrimmerWake";
-const SCHEMA_VERSION = 12;
+const SCHEMA_VERSION = 13;
 
 const DEFAULT_STATE = {
   schemaVersion: SCHEMA_VERSION,
@@ -28,11 +28,18 @@ const DEFAULT_STATE = {
   lastKickAt: null
 };
 
+function migrateState(stored) {
+  if (!stored) return { ...DEFAULT_STATE };
+  const migrated = { ...DEFAULT_STATE, ...stored, schemaVersion: SCHEMA_VERSION };
+  // 100,000 was the historical default. Migrate only that exact value so
+  // deliberate custom token targets remain untouched.
+  if (Number(stored.targetTokens) === 100000) migrated.targetTokens = 30000;
+  return migrated;
+}
+
 async function getState() {
   const result = await chrome.storage.local.get(STATE_KEY);
-  const stored = result[STATE_KEY];
-  if (!stored || stored.schemaVersion !== SCHEMA_VERSION) return { ...DEFAULT_STATE };
-  return { ...DEFAULT_STATE, ...stored };
+  return migrateState(result[STATE_KEY]);
 }
 
 async function setState(patch) {
@@ -158,6 +165,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 
 chrome.runtime.onStartup.addListener(async () => {
   const state = await getState();
+  await chrome.storage.local.set({ [STATE_KEY]: state });
   await syncAlarm(state);
   if (state.active) await kickJob("browser startup");
 });
@@ -179,7 +187,9 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   (async () => {
     if (message?.type === "GET_STATE") {
-      sendResponse({ ok: true, state: await getState() });
+      const state = await getState();
+      await chrome.storage.local.set({ [STATE_KEY]: state });
+      sendResponse({ ok: true, state });
       return;
     }
     if (message?.type === "SET_STATE") {
