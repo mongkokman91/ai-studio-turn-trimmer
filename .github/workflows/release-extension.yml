@@ -15,7 +15,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Read version
         id: version
@@ -37,8 +37,9 @@ jobs:
           CRX_PRIVATE_KEY_B64: ${{ secrets.CRX_PRIVATE_KEY_B64 }}
         shell: bash
         run: |
-          echo "$CRX_PRIVATE_KEY_B64" | base64 --decode > extension.pem
-          chmod 600 extension.pem
+          printf '%s' "$CRX_PRIVATE_KEY_B64" | base64 --decode > "$RUNNER_TEMP/extension.pem"
+          chmod 600 "$RUNNER_TEMP/extension.pem"
+          openssl pkey -in "$RUNNER_TEMP/extension.pem" -noout -check
 
       - name: Build signed CRX and update manifest
         if: ${{ env.CRX_PRIVATE_KEY_B64 != '' }}
@@ -49,9 +50,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y chromium-browser || sudo apt-get install -y chromium
           CHROME=$(command -v chromium-browser || command -v chromium)
-          "$CHROME" --no-sandbox --pack-extension="$GITHUB_WORKSPACE" --pack-extension-key="$GITHUB_WORKSPACE/extension.pem"
+          "$CHROME" --no-sandbox --pack-extension="$GITHUB_WORKSPACE" --pack-extension-key="$RUNNER_TEMP/extension.pem"
           mv "${GITHUB_WORKSPACE}.crx" dist/ai-studio-turn-trimmer.crx
-          ID=$(openssl rsa -in extension.pem -pubout -outform DER 2>/dev/null | openssl sha256 -binary | head -c 16 | xxd -p -c 32 | tr '0-9a-f' 'a-p')
+          ID=$(openssl pkey -in "$RUNNER_TEMP/extension.pem" -pubout -outform DER 2>/dev/null | openssl sha256 -binary | head -c 16 | xxd -p -c 32 | tr '0-9a-f' 'a-p')
           cat > dist/updates.xml <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <gupdate xmlns="http://www.google.com/update2/response" protocol="2.0">
@@ -61,7 +62,7 @@ jobs:
           </gupdate>
           EOF
           echo "Extension ID: $ID"
-          rm -f extension.pem
+          rm -f "$RUNNER_TEMP/extension.pem"
 
       - name: Publish version release
         env:
